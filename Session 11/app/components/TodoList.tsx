@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   FlatList,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -52,6 +53,7 @@ export default function TodoList() {
         await addTodo(text.trim());
       }
       setText("");
+      Keyboard.dismiss();
       await reload();
     } catch (e) {
       console.error(e);
@@ -178,6 +180,14 @@ export default function TodoList() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Todos (SQLite)</Text>
+
+      <View style={styles.countRow}>
+        <Text style={styles.countText}>
+          {todos.filter((t) => t.done === 0).length} active,{" "}
+          {todos.filter((t) => t.done === 1).length} completed
+        </Text>
+      </View>
+
       <View style={styles.inputRow}>
         <TextInput
           placeholder="Write a todo..."
@@ -192,6 +202,21 @@ export default function TodoList() {
             disabled={isSaving || !text.trim()}
           />
         </View>
+        {editingId !== null && (
+          <>
+            <View style={{ width: 8 }} />
+            <View style={styles.btnAdd}>
+              <Button
+                title="Cancel"
+                color="#6c757d"
+                onPress={() => {
+                  setEditingId(null);
+                  setText("");
+                }}
+              />
+            </View>
+          </>
+        )}
       </View>
 
       <View style={styles.filterRow}>
@@ -254,7 +279,13 @@ export default function TodoList() {
         keyExtractor={(item, index) => String(item.id ?? index)}
         renderItem={renderItem}
         ListEmptyComponent={() => (
-          <Text style={{ textAlign: "center" }}>No todos yet.</Text>
+          <Text style={{ textAlign: "center" }}>
+            {filter === "active"
+              ? "No active todos"
+              : filter === "completed"
+              ? "No completed todos yet"
+              : "No todos yet."}
+          </Text>
         )}
       />
     </View>
@@ -294,4 +325,6 @@ const styles = StyleSheet.create({
   filterButtonTextActive: { color: "#fff" },
   btnWrap: { width: 84, height: 36, justifyContent: "center" },
   btnAdd: { width: 72, height: 36, justifyContent: "center" },
+  countRow: { marginBottom: 8, alignItems: "center" },
+  countText: { fontSize: 13, color: "#666" },
 });
